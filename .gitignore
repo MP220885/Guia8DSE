@@ -1,0 +1,9 @@
+.vs/
+.dotnet/
+.nuget/
+**/bin/
+**/obj/
+*.csproj.user
+*.suo
+*.slnLaunch.user
+**/appsettings.Local.json
