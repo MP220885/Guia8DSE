@@ -7,8 +7,16 @@ namespace LibrosAPI.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class LibrosController(LibrosDbContext context, IRedisCache cache) : ControllerBase
+public class LibrosController : ControllerBase
 {
+    private readonly LibrosDbContext context;
+    private readonly IRedisCache cache;
+
+    public LibrosController(LibrosDbContext context, IRedisCache? cache = null)
+    {
+        this.context = context;
+        this.cache = cache ?? new NoOpRedisCache();
+    }
     [HttpGet] public async Task<ActionResult<IEnumerable<Libro>>> GetLibros()
     {
         const string cacheKey = "libros:list";
@@ -32,6 +40,9 @@ public class LibrosController(LibrosDbContext context, IRedisCache cache) : Cont
 
     [HttpPost] public async Task<ActionResult<Libro>> PostLibro(Libro libro)
     {
+        if (string.IsNullOrWhiteSpace(libro.Titulo))
+            return BadRequest("El libro no tiene título.");
+
         context.Libros.Add(libro);
         await context.SaveChangesAsync();
         await cache.RemoveAsync("libros:list");
